@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1084011067800",
+    "project_id": "blueraycargotest",
+    "storage_bucket": "blueraycargotest.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084011067800:android:2599be080db1f42a6393ed",
+        "android_client_info": {
+          "package_name": "com.testblueraycargo.test_blueraycargo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1084011067800-de2e6o3gai604kbll044ls2b6ss2obrm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANw3YFb27c26gS4nSXzHwTRgf39Q0_818"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1084011067800-de2e6o3gai604kbll044ls2b6ss2obrm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

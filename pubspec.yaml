@@ -1,0 +1,55 @@
+name: test_blueraycargo
+description: test blueray cargo
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # state management dependency
+  flutter_riverpod: ^1.0.0
+
+  # Firebase related dependencies
+  firebase_core: ^1.10.0
+  firebase_auth: ^3.2.0
+  cloud_firestore: ^3.1.0
+  firebase_storage: ^10.1.0
+
+  # Other third party dependencies
+  google_sign_in: ^5.2.1
+
+  # native device features dependencies
+  connectivity: ^3.0.6
+  shared_preferences: ^2.0.9
+  image_picker: ^0.8.4+4
+  flutter_image_compress: ^1.1.0
+
+  # utilities dependencies
+  uuid: ^3.0.5
+  intl: ^0.17.0
+
+  # UI Dependencies
+  cupertino_icons: ^1.0.2
+  cached_network_image: ^3.1.0+1
+  flash: ^2.0.3
+  shimmer: ^2.0.0
+  pattern_formatter: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^1.0.0
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
