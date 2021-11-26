@@ -22,13 +22,42 @@ class FirestoreProductsService {
     }
   }
 
+  Future<void> editProduct({
+    required String productId,
+    required String name,
+    required int quantity,
+    required String imageURL,
+  }) async {
+    try {
+      final Map<String, dynamic> updatedData = {
+        FirestoreProductField.name: name,
+        FirestoreProductField.quantity: quantity,
+        FirestoreProductField.imageULR: imageURL,
+      };
+
+      await _db.collection(_path).doc(productId).update(updatedData);
+    } catch (error) {
+      debugPrint(error.toString());
+      throw GeneralException("gagal mengedit produk");
+    }
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    try {
+      await _db.collection(_path).doc(productId).delete();
+    } catch (error) {
+      debugPrint(error.toString());
+      throw GeneralException("gagal menghapus produk");
+    }
+  }
+
   Future<List<Product>> getProducts({
     required int limit,
     Product? lastProductDocument,
   }) async {
     try {
       Query query;
-      query = _db.collection(_path).orderBy(FirestoreProductField.createdAt, descending: false).limit(limit);
+      query = _db.collection(_path).orderBy(FirestoreProductField.createdAt, descending: true).limit(limit);
 
       if (lastProductDocument != null) {
         query = query.startAfter([lastProductDocument.createdAt]);

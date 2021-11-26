@@ -10,15 +10,21 @@ import 'package:test_blueraycargo/models/product.dart';
 import 'package:test_blueraycargo/services/firebase_authentication/firebase_auth_service.dart';
 import 'package:test_blueraycargo/services/firebase_firestore/firestore_products_service.dart';
 import 'package:test_blueraycargo/services/firebase_storage/firebase_storage_service.dart';
+import 'package:test_blueraycargo/shared_providers/product_list_controller_provider.dart';
+import 'package:test_blueraycargo/utilities/constants/hive/hive_key.dart';
+import 'package:test_blueraycargo/utilities/helper_functions/hive_helper.dart';
 import 'package:test_blueraycargo/utilities/mixins/connectivity_checker.dart';
 import 'package:uuid/uuid.dart';
 
 final productsPageControllerProvider = ChangeNotifierProvider.autoDispose<ProductsPageController>((ref) {
+  final availableProductListController = ref.watch(availableProductListControllerProvider);
   return ProductsPageController(
     FirebaseAuthService.instance,
     GoogleSignIn(),
     FirebaseStorageService.instance,
     FirestoreProductsService.instance,
+    HiveHelper.instance,
+    availableProductListController,
   );
 });
 
@@ -27,13 +33,19 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
   final GoogleSignIn _googleSignIn;
   final FirebaseStorageService _firebaseStorageService;
   final FirestoreProductsService _firestoreProductsService;
+  final HiveHelper _hiveHelper;
+  final AvailableProductListController _availableProductListController;
 
   ProductsPageController(
     this._firebaseAuth,
     this._googleSignIn,
     this._firebaseStorageService,
     this._firestoreProductsService,
+    this._hiveHelper,
+    this._availableProductListController,
   );
+
+  bool isEditing = false;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -47,6 +59,9 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
   String _selectedProductName = "";
   String get selectedProductName => _selectedProductName;
   set selectedProductName(String newProductName) => _selectedProductName = newProductName.trim();
+
+  String editedImageURL = "";
+  String editedProductId = "";
 
   int _selectedProductQuantity = 0;
   int get selectedProductQuantity => _selectedProductQuantity;
@@ -64,6 +79,9 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
     _selectedProductName = "";
     _selectedProductQuantity = 0;
     _isLoading = false;
+    isEditing = false;
+    editedImageURL = "";
+    editedProductId = "";
     notifyListeners();
   }
 
@@ -75,6 +93,17 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
 
   void _stopLoading() {
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void performEditingAction(String productId) {
+    isEditing = true;
+    final editedProduct = _availableProductListController.getProductOnTheList(productId);
+    _selectedProductQuantity = editedProduct.quantity;
+    _selectedProductName = editedProduct.name;
+    editedImageURL = editedProduct.imageURL;
+    editedProductId = editedProduct.id;
+
     notifyListeners();
   }
 
@@ -148,6 +177,53 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
     return null;
   }
 
+  Future<void> deleteProductFromServer(String productID) async {
+    _startLoading();
+
+    try {
+      await _firestoreProductsService.deleteProduct(productID);
+      _hiveHelper.clearTimestamp(timeStampHiveKey: HiveKey.timestampFetchingAvailableProducts);
+      _availableProductListController.removeAnItemFromList(productID);
+    } catch (error) {
+      rethrow;
+    } finally {
+      _stopLoading();
+    }
+  }
+
+  Future<void> editProductInServer(String productId) async {
+    _startLoading();
+
+    try {
+      final productImageIsChanged = (isEditing && (_productImageFile != null));
+
+      if (productImageIsChanged) {
+        editedImageURL = await _firebaseStorageService.uploadProductImage(
+          productImageFile: _productImageFile!,
+          productID: productId,
+        );
+      }
+
+      await _firestoreProductsService.editProduct(
+        productId: productId,
+        name: _selectedProductName,
+        quantity: _selectedProductQuantity,
+        imageURL: editedImageURL,
+      );
+
+      _availableProductListController.editItemOfTheList(productId: productId, imageURL: editedImageURL, name: _selectedProductName, quantity: _selectedProductQuantity);
+      _hiveHelper.clearTimestamp(timeStampHiveKey: HiveKey.timestampFetchingAvailableProducts);
+
+      restartState();
+    } catch (error) {
+      debugPrint(error.toString());
+      _errorMessage = error.toString();
+      rethrow;
+    } finally {
+      _stopLoading();
+    }
+  }
+
   Future<void> uploadProductToServer() async {
     _startLoading();
 
@@ -169,6 +245,9 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
 
       final productData = newProduct.toMap();
       await _firestoreProductsService.createProduct(productData);
+      _availableProductListController.addItemAtTheBeginningOfTheList(newProduct);
+      _hiveHelper.clearTimestamp(timeStampHiveKey: HiveKey.timestampFetchingAvailableProducts);
+
       restartState();
     } catch (error) {
       debugPrint(error.toString());
@@ -184,6 +263,7 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
       final prefs = await SharedPreferences.getInstance();
       prefs.setBool("hasLoggedIn", false);
 
+      await _hiveHelper.clearBoxesWhenSignOut();
       await _googleSignIn.signOut();
       await _firebaseAuth.logOut();
     } catch (error) {

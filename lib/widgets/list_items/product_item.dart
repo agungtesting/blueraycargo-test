@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:test_blueraycargo/models/product.dart';
@@ -7,20 +6,63 @@ import 'package:test_blueraycargo/utilities/constants/assets_name/images/image_a
 
 class ProductItem extends StatelessWidget {
   final Product product;
-  const ProductItem(Key key, {required this.product}) : super(key: key);
+  final Function(String value) onDeleteClicked;
+  final Function(String value) onEditClicked;
+
+  const ProductItem(
+    Key key, {
+    required this.product,
+    required this.onDeleteClicked,
+    required this.onEditClicked,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      child: Column(
         children: [
-          _ProductImage(productImageURL: product.imageURL),
-          const SizedBox(width: 16),
-          Expanded(child: _ProductInfo(name: product.name, quantity: product.quantity)),
+          _buildProductInfo(),
+          const SizedBox(height: 8),
+          _buildActionButtons(),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        const SizedBox(width: 6),
+        SizedBox(
+          width: 100,
+          child: ElevatedButton(
+            onPressed: () => onEditClicked(product.id),
+            child: const Text("Edit"),
+            style: ElevatedButton.styleFrom(primary: Colors.orange),
+          ),
+        ),
+        const Spacer(),
+        SizedBox(
+          width: 100,
+          child: ElevatedButton(
+            onPressed: () => onDeleteClicked(product.id),
+            child: const Text("Hapus"),
+            style: ElevatedButton.styleFrom(primary: Colors.red),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductInfo() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _ProductImage(productImageURL: product.imageURL),
+        const SizedBox(width: 16),
+        Expanded(child: _ProductInfo(name: product.name, quantity: product.quantity)),
+      ],
     );
   }
 }
@@ -41,9 +83,10 @@ class _ProductInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 4),
           Text(
-            name,
-            maxLines: 2,
+            "Nama: $name",
+            maxLines: 1,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),

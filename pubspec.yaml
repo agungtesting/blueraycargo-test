@@ -28,6 +28,9 @@ dependencies:
   shared_preferences: ^2.0.9
   image_picker: ^0.8.4+4
   flutter_image_compress: ^1.1.0
+  hive: ^2.0.4
+  hive_flutter: ^1.1.0
+  path_provider: ^2.0.2
 
   # utilities dependencies
   uuid: ^3.0.5
@@ -38,12 +41,14 @@ dependencies:
   cached_network_image: ^3.1.0+1
   flash: ^2.0.3
   shimmer: ^2.0.0
-  pattern_formatter: ^2.0.0
+  after_layout: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  build_runner: ^2.1.2
+  hive_generator: ^1.1.0
   flutter_lints: ^1.0.0
 
 flutter:

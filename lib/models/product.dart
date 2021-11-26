@@ -1,11 +1,25 @@
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:test_blueraycargo/utilities/constants/firestore/firestore_product_field_name.dart';
+import 'package:test_blueraycargo/utilities/constants/hive/hive_type_id.dart';
 import 'package:test_blueraycargo/utilities/helper_functions/map_helper.dart';
 
+part 'product.g.dart';
+
+@HiveType(typeId: HiveTypeId.product)
 class Product {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final int quantity;
+
+  @HiveField(2)
   final String name;
+
+  @HiveField(3)
   final String imageURL;
+
+  @HiveField(4)
   final DateTime createdAt;
 
   const Product({

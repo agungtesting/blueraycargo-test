@@ -5,10 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_blueraycargo/pages/login/login_page.dart';
 import 'package:test_blueraycargo/pages/products/products_page.dart';
 import 'package:test_blueraycargo/route_generator.dart';
+import 'package:test_blueraycargo/utilities/helper_functions/hive_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await HiveHelper.instance.setUpHive();
 
   final prefs = await SharedPreferences.getInstance();
   final bool hasLoggedIn = prefs.getBool("hasLoggedIn") ?? false;
