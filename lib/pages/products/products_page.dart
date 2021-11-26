@@ -119,8 +119,12 @@ class _MainLayout extends ConsumerWidget {
 
     final isEditing = pageController.isEditing;
 
+    // prefilled the text
     _productNameTextController.text = pageController.selectedProductName;
     _productQuantityTextController.text = (pageController.selectedProductQuantity == 0 && !isEditing) ? "" : pageController.selectedProductQuantity.toString();
+
+    // set cursor to be always at the end of text field
+    _productNameTextController.selection = TextSelection.fromPosition(TextPosition(offset: _productNameTextController.text.length));
     _productQuantityTextController.selection = TextSelection.fromPosition(TextPosition(offset: _productQuantityTextController.text.length));
 
     return Column(
@@ -240,10 +244,12 @@ class _MainLayout extends ConsumerWidget {
   void _mainButtonClicked(ProductsPageController pageController, BuildContext context, GlobalKey<FormState> form, bool isEditing) async {
     FocusScope.of(context).unfocus(); // hide keyboard
 
-    final productImageError = pageController.validateProductImage();
-    if (productImageError != null) {
-      showErrorSnackBar(context, content: productImageError);
-      return;
+    if (!isEditing) {
+      final productImageError = pageController.validateProductImage();
+      if (productImageError != null) {
+        showErrorSnackBar(context, content: productImageError);
+        return;
+      }
     }
 
     final inputIsValid = form.currentState!.validate();
@@ -257,7 +263,7 @@ class _MainLayout extends ConsumerWidget {
 
     try {
       if (isEditing) {
-        await pageController.editProductInServer();
+        await pageController.editProductInFirestore();
         showSnackBarInfo(context, content: "Produk Berhasil DiEdit!");
       } else {
         await pageController.uploadProductToServer();

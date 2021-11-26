@@ -48,22 +48,28 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
   bool isEditing = false;
 
   bool _isLoading = false;
+
   bool get isLoading => _isLoading;
 
   File? _productImageFile;
+
   File? get productImageFile => _productImageFile;
 
   String? _errorMessage;
+
   String? get errorMessage => _errorMessage;
 
   String _selectedProductName = "";
+
   String get selectedProductName => _selectedProductName;
+
   set selectedProductName(String newProductName) => _selectedProductName = newProductName.trim();
 
   String editedImageURL = "";
-  String editedProductId = "";
+  String _editedProductId = "";
 
   int _selectedProductQuantity = 0;
+
   int get selectedProductQuantity => _selectedProductQuantity;
 
   void updateSelectedProductQuantity(String newQuantity) {
@@ -81,7 +87,7 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
     _isLoading = false;
     isEditing = false;
     editedImageURL = "";
-    editedProductId = "";
+    _editedProductId = "";
     notifyListeners();
   }
 
@@ -102,7 +108,7 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
     _selectedProductQuantity = editedProduct.quantity;
     _selectedProductName = editedProduct.name;
     editedImageURL = editedProduct.imageURL;
-    editedProductId = editedProduct.id;
+    _editedProductId = editedProduct.id;
 
     notifyListeners();
   }
@@ -191,7 +197,7 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
     }
   }
 
-  Future<void> editProductInServer(String productId) async {
+  Future<void> editProductInFirestore() async {
     _startLoading();
 
     try {
@@ -200,19 +206,19 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
       if (productImageIsChanged) {
         editedImageURL = await _firebaseStorageService.uploadProductImage(
           productImageFile: _productImageFile!,
-          productID: productId,
+          productID: _editedProductId,
         );
       }
 
       await _firestoreProductsService.editProduct(
-        productId: productId,
+        productId: _editedProductId,
         name: _selectedProductName,
         quantity: _selectedProductQuantity,
         imageURL: editedImageURL,
       );
 
-      _availableProductListController.editItemOfTheList(productId: productId, imageURL: editedImageURL, name: _selectedProductName, quantity: _selectedProductQuantity);
       _hiveHelper.clearTimestamp(timeStampHiveKey: HiveKey.timestampFetchingAvailableProducts);
+      _availableProductListController.editItemOfTheList(productId: _editedProductId, imageURL: editedImageURL, name: _selectedProductName, quantity: _selectedProductQuantity);
 
       restartState();
     } catch (error) {
@@ -245,8 +251,8 @@ class ProductsPageController with ChangeNotifier, ConnectivityChecker {
 
       final productData = newProduct.toMap();
       await _firestoreProductsService.createProduct(productData);
-      _availableProductListController.addItemAtTheBeginningOfTheList(newProduct);
       _hiveHelper.clearTimestamp(timeStampHiveKey: HiveKey.timestampFetchingAvailableProducts);
+      _availableProductListController.addItemAtTheBeginningOfTheList(newProduct);
 
       restartState();
     } catch (error) {

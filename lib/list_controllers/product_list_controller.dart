@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:test_blueraycargo/list_controllers/list_controller.dart';
 import 'package:test_blueraycargo/models/product.dart';
 
@@ -18,6 +19,7 @@ abstract class ProductListController extends ListController<Product> {
     required int quantity,
   }) {
     final index = items.indexWhere((element) => element.id == productId);
+
     final oldProductData = items[index];
     final newEditedProduct = Product(
       id: productId,
@@ -26,6 +28,8 @@ abstract class ProductListController extends ListController<Product> {
       name: name,
       createdAt: oldProductData.createdAt,
     );
+
+    items.removeWhere((element) => element.id == productId);
     items.insert(index, newEditedProduct);
   }
 

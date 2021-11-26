@@ -16,11 +16,11 @@ class EmptyProductResult extends StatelessWidget {
             const Spacer(),
             Image.asset(
               ImageAssetsName.emptyPicture,
-              height: MediaQuery.of(context).size.width * 0.4,
-              width: MediaQuery.of(context).size.width * 0.4,
+              height: MediaQuery.of(context).size.width * 0.25,
+              width: MediaQuery.of(context).size.width * 0.25,
               fit: BoxFit.cover,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Text(
               textMessage,
               textAlign: TextAlign.center,
